@@ -1,0 +1,26 @@
+version: "3.6"
+
+services:
+  prometheus:
+    container_name: prometheus-main
+    image: prom/prometheus:v2.46.0
+    # Linux hosts only; on macOS/Windows remove this and use ports below.
+    network_mode: host
+    # ports:
+    #   - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    volumes:               # <— this must be under the service
+      - prometheus_data:/prometheus
+      - type: bind
+        source: ./prometheus-config
+        target: /etc/prometheus
+        read_only: true
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:

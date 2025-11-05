@@ -1,0 +1,29 @@
+- name: Deploying prometheus using ansible
+  hosts: hosts
+  vars_files:
+    - "vars.yml"
+  tasks:
+
+    - name: Copy and sync the controller and managed node files
+      ansible.posix.synchronize:
+        src: "{{ base_dir }}"
+        dest: "{{ dest_dir }}"
+        rsync_opts:
+          - "--exclude=ansible/"
+    
+    # Before the following task, run the docker-installation.yml 
+
+    - name: Check if docker compose exists
+      command: which docker
+      register: result
+    
+    - name: Validate compose file
+      become: true
+      command: docker compose -f "{{ compose_file }}" config -q
+      register: validate
+      changed_when: false
+
+    - name: Deploy prometheus docker compose
+      become: true
+      command: docker compose -f "{{ compose_file }}" up -d
+      when: result.rc == 0 and validate.rc == 0
