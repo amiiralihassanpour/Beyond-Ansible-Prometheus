@@ -36,3 +36,5 @@ ssh -p 2222 root@localhost
 
 **working directory is: /work/**
 
+**Note: In my managed node I have this directory -> /home/prometheus**
+
