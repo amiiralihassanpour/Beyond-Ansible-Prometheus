@@ -8,7 +8,7 @@ ARG GID=1000
 # OS deps + SSH client/server + useful net tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
       openssh-client openssh-server ca-certificates tini git bash \
-      less iproute2 net-tools dnsutils iputils-ping nano \
+      less iproute2 net-tools dnsutils iputils-ping nano rsync \
   && rm -rf /var/lib/apt/lists/*
 
 # Create user and set passwords (DEV ONLY)
@@ -20,14 +20,18 @@ RUN groupadd -g ${GID} ${USER} && \
 # Work dirs
 RUN mkdir -p /work /ssh /run/sshd && chown -R ${USER}:${USER} /work /ssh
 
-# Ansible
-RUN pip install --no-cache-dir ansible-core
+# --- Ansible -----------------------------------------------------------------
+# ansible-core provides ansible-galaxy (enough for collections)
+RUN pip install --no-cache-dir "ansible-core>=2.16"
 
-# Install ansible.posix collection
-RUN ansible-galaxy collection install ansible.posix -p /usr/share/ansible/collections
-RUN apt-get update && apt-get install -y --no-install-recommends rsync && rm -rf /var/lib/apt/lists/*
-
-
+# Install collections used by your playbooks (docker, general, posix)
+# Install to a system path and export ANSIBLE_COLLECTIONS_PATHS so Ansible finds them.
+RUN ansible-galaxy collection install \
+      community.docker \
+      community.general \
+      ansible.posix \
+    --collections-path /usr/share/ansible/collections
+ENV ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections
 
 # SSHD config: allow root & password auth (DEV ONLY)
 RUN sed -ri 's/^#?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
@@ -45,8 +49,6 @@ ENV ANSIBLE_CONFIG=/work/ansible.cfg
 # Entrypoint
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh && chmod +x /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
 
 WORKDIR /work
 EXPOSE 22

@@ -27,3 +27,17 @@
       become: true
       command: docker compose -f "{{ compose_file }}" up -d
       when: result.rc == 0 and validate.rc == 0
+    
+    - name: Ensure the container is running
+      become: true
+      community.docker.docker_container:
+        name: prometheus-main
+      register: container
+    
+    # after you register: container
+    - name: Fail if container is not running
+      ansible.builtin.fail:
+        msg: "Prometheus container is not running"
+      when: not (container.container.State.Running | default(false))
+    
+  
