@@ -6,7 +6,7 @@ The setup runs inside a **containerized dev environment** using a Dockerfile and
 
 ## Dev 
 
-This repository provides a containerized development environment for learning and working with Ansible using Docker. The container setup includes Ansible installation and SSH access, allowing you to develop and test Ansible playbooks in an isolated environment.
+This repository provides a containerized development environment for working with Ansible using Docker. The container setup includes Ansible installation and SSH access, allowing you to develop and test Ansible playbooks in an isolated environment.
 
 ### Prerequisites
 - Docker installed on your machine.
