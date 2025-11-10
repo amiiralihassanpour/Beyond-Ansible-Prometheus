@@ -1,3 +1,4 @@
+# you can update these variables based on your own environment
 base_dir: "{{ playbook_dir | dirname }}"
 dest_dir: "/home/prometheus"
 home_dir: "{{ dest_dir }}/prometheus"
