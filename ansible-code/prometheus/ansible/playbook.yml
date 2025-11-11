@@ -17,6 +17,11 @@
       command: which docker
       register: result
     
+    - name: Make compose file using j2 template
+      template:
+        src: templates/prometheus.j2
+        dest: "{{ compose_file }}"
+    
     - name: Validate compose file
       become: true
       command: docker compose -f "{{ compose_file }}" config -q
@@ -31,7 +36,7 @@
     - name: Ensure the container is running
       become: true
       community.docker.docker_container:
-        name: prometheus-main
+        name: "{{ container_name | default('prometheus-main') }}"
       register: container
     
     # after you register: container
@@ -40,4 +45,13 @@
         msg: "Prometheus container is not running"
       when: not (container.container.State.Running | default(false))
     
-  
+    - name: Get the info about containers
+      become: true
+      shell:
+        cmd: "docker ps --format '{% raw %}{{.Names}}: {{.Status}}{% endraw %}'"
+      register: docker_ps_output
+    
+    - name: Show the info about containers
+      debug:
+        var: "{{ docker_ps_output.stdout_lines }}"
+      
