@@ -20,7 +20,6 @@ services:
         source: {{ prometheus_config_source | default("./prometheus-config") }}
         target: /etc/prometheus
         read_only: true
-    restart: {{ restart_policy | default("unless-stopped") }}
-
+    restart: {{ restart_policy if restart_policy else always }}
 volumes:
   {{ prometheus_data_volume | default("prometheus_data") }}:
