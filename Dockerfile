@@ -8,7 +8,7 @@ ARG GID=1000
 # OS deps + SSH client/server + useful net tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
       openssh-client openssh-server ca-certificates tini git bash \
-      less iproute2 net-tools dnsutils iputils-ping nano rsync \
+      less iproute2 net-tools dnsutils iputils-ping nano rsync sshpass \
   && rm -rf /var/lib/apt/lists/*
 
 # Create user and set passwords (DEV ONLY)
@@ -22,14 +22,24 @@ RUN mkdir -p /work /ssh /run/sshd && chown -R ${USER}:${USER} /work /ssh
 
 # --- Ansible -----------------------------------------------------------------
 # ansible-core provides ansible-galaxy (enough for collections)
-RUN pip install --no-cache-dir "ansible-core>=2.16"
+RUN pip install --no-cache-dir \
+      "ansible-core>=2.16" \
+      docker \
+      jmespath \
+      requests
 
-# Install collections used by your playbooks (docker, general, posix)
-# Install to a system path and export ANSIBLE_COLLECTIONS_PATHS so Ansible finds them.
+# Install collections used by your playbooks
+#   - community.docker: manage/query Docker
+#   - community.general: lots of general modules/filters
+#   - ansible.posix: posix/cron/acl modules
+#   - containers.podman: (optional) podman support
+#   - ansible.utils: useful filters/validators
 RUN ansible-galaxy collection install \
       community.docker \
       community.general \
       ansible.posix \
+      containers.podman \
+      ansible.utils \
     --collections-path /usr/share/ansible/collections
 ENV ANSIBLE_COLLECTIONS_PATHS=/usr/share/ansible/collections
 
