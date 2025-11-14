@@ -38,3 +38,14 @@ ssh -p 2222 root@localhost
 
 **Note: In my managed node I have this directory -> /home/prometheus**
 
+## prometheus exportes
+Prometheus exporters are lightweight programs (or built-in modules) that collect metrics from a system, service, or hardware and expose them in a format that Prometheus can scrape.
+
+Think of exporters as metric translators:
+
+They take internal metrics from a system → convert them → expose them on an HTTP endpoint like `/metrics`.
+Prometheus then scrapes that endpoint and stores the metrics in its time-series database.
+
+### Why do we need exportes
+Because most applications, databases, or OS components don’t speak Prometheus format natively.
+Exporters solve this by making almost anything “observable” by Prometheus.
