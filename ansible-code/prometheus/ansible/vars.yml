@@ -4,5 +4,5 @@ dest_dir: "/home/prometheus"
 home_dir: "{{ dest_dir }}/prometheus"
 compose_file: "{{ home_dir }}/docker/prometheus.yml"
 
-container_name: "prometheus-main"
+container_name: "prometheus"
 restart_policy: "{{ lookup('env', 'RESTART') }}"

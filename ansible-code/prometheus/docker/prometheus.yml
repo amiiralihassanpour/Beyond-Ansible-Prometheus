@@ -1,26 +1,29 @@
-version: "3.6"
+version : !!str 3.6 
 
 services:
   prometheus:
-    container_name: prometheus-main
-    image: prom/prometheus:v2.46.0
-    # Linux hosts only; on macOS/Windows remove this and use ports below.
-    network_mode: host
-    # ports:
-    #   - "9090:9090"
+    container_name: {{ container_name | default("prometheus-main") }}
+    image: {{ image_name | default("prom/prometheus:v2.46.0") }}
+    network_mode: {{ network_mode | default("host") }}
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.enable-lifecycle'
-    volumes:               # <— this must be under the service
-      - prometheus_data:/prometheus
-      - type: bind
-        source: ./prometheus-config
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/share/prometheus/console/libraries_web
+      - --web.enable-lifecycle
+    volumes:
+      - {{ prometheus_data_volume | default("prometheus_data") }}:/prometheus
+      - type: "bind"
+        source: {{ prometheus_config_source | default("../prometheus-config/") }}
         target: /etc/prometheus
         read_only: true
-    restart: unless-stopped
+        bind:
+          propagation: shared
+        consistency: cached
+    restart: {% if restart_policy %}
+                      {{ restart_policy }}
+                    {% else %}
+                       always
+                    {% endif %}
 
 volumes:
-  prometheus_data:
+  {{prometheus_data_volume | default("prometheus_data") }}:
