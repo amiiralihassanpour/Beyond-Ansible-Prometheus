@@ -49,3 +49,6 @@ Prometheus then scrapes that endpoint and stores the metrics in its time-series 
 ### Why do we need exportes
 Because most applications, databases, or OS components don’t speak Prometheus format natively.
 Exporters solve this by making almost anything “observable” by Prometheus.
+
+In our project we are using the followin exporter from this repository:
+https://github.com/Shayan-Ghani/Container-Exporter
