@@ -1,0 +1,49 @@
+- name: Setup container exporter
+  hosts: hosts
+  vars_files:
+    - "vars.yml"
+  #environment:
+  #  PATH: "{{ PATH }}"
+  become: true
+  tasks:
+
+    - name: Checkout to the repo
+      git:
+        repo: "{{ CPX_repo_url }}"
+        dest: "{{ repo_dir }}"
+    
+    - name: Check the version of python
+      shell:
+        cmd: python3 --version | awk '{print $2}'
+      register: python_version
+            
+    - name: Run setup-env if the python version is not ok
+      include_tasks: "{{ playbook_dir }}/setup-pyvenv.yml"
+      when: python_version.stdout is version('3.10.12', '<')
+    
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages }}"
+    
+    #- name: Create virtual env
+    #  shell: pyenv virtualenv python_virtual_env
+    #  when: not no_pyenv
+
+    - name: Create virtual env using venv
+      shell:
+        cmd: python3 -m venv python_virtual_env
+        chdir: "{{ repo_dir }}"
+    
+    
+    - name: Install requirements.txt
+      pip:
+        requirements: "{{ repo_dir }}/requirements.txt"
+        virtualenv: "{{ repo_dir }}/python_virtual_env"
+    
+    - name: Deploy cpx
+      shell:
+        cmd: bash -c 'source {{ repo_dir }}/python_virtual_env/bin/activate && bash start.sh &'
+        chdir: "{{ repo_dir }}"
+

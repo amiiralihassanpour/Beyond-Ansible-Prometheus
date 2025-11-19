@@ -6,3 +6,11 @@ compose_file: "{{ home_dir }}/docker/prometheus.yml"
 
 container_name: "prometheus"
 restart_policy: "{{ lookup('env', 'RESTART') }}"
+
+PATH: "/home/{{ ansible_user }}/.pyenv/bin:/home/{{ ansible_user }}/.pyenv/shims:{{ ansible_facts.env.PATH }}"
+
+CPX_repo_url: https://github.com/Shayan-Ghani/Container-Exporter.git
+repo_dir: "{{ home_dir }}/cpx"
+packages:
+  - python3-pip
+  - python3-venv
